@@ -6,23 +6,44 @@
 % % addpath('/path/to/roast-master')
 
 
-function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,smallblobsize,cutoffpositionz)
+function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,smallblobsize,cutoffpositionz,thres_factor)
 % % Author: Sina Straub, sina.straub@gmail.com, sina.straub@unibe.ch
 % % Copyright (c) 2025 Sina Straub. Licensed under the GPL v3.
 
-
+%might need to remove "/.../.../SimNIBS-4.5/simnibs_env/lib/python3.11/site-packages/simnibs/examples"
+%from path (because it contains repelem.m which is also a Matlab function)
 
 %%%fullpath - location of subject dirs
 %%%subdir - list of subjects: m2m_sub-xyz
 %%%numElec - number of electrodes
 %%% elec_list - list of planned electrode positions such as {'F3','AF3','F1','FC3','F5'}
-%%% smallblobsize - 30 (use 30)
+%%% smallblobsize - 30 (use 30, only adjust for low quality data, e.g. to 50)
 %%% cutoffpositionz - no electrodes are expected below this slice index
+%%% thres_factor - factor that is multiplied with the mean signal intensity
+%%% from all voxels that have not been segmented to be tissue. 2 is default and should
+%%% work when electrodes/gel are ok visible, otherwise try 0.5, 0.8, 0.9
+if nargin<7
+thres_factor=2;
+end
+
 
     figure
-    %%%Get head measures
+    %%%Get head measures - this is optional (but in this step a figure is created which we might need later)
     h_mesh = mesh_load_gmsh4([fullpath,subdir,'/',subdir(5:end),'.msh']);
+    try
     computeHeadMeas3(h_mesh, [fullpath,subdir,'/','eeg_positions/Fiducials.csv'], subdir(5:end))
+    catch
+        all_tri = h_mesh.triangles;            % Nx3
+tri_regions = h_mesh.triangle_regions; % Nx1
+vertices = h_mesh.nodes;               % Mx3
+%%% Extract scalp region (e.g., 1005)
+scalp_id = 1005;
+scalp_mask = tri_regions == scalp_id;
+scalp_tri = all_tri(scalp_mask, :);
+scalp_vertices = vertices;
+trisurf(scalp_tri, scalp_vertices(:,1), scalp_vertices(:,2), scalp_vertices(:,3), ...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none', 'FaceColor', 'cyan');
+    end
     %%%load tissues, t1 and generate electrode mask and get electrode coord
     [epos,elist]=get_standard_eeg_pos([fullpath,subdir],elec_list);
     %%%extract electrode locations
@@ -50,7 +71,7 @@ function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,small
     mask_elec=electrode_loc_prior(mask_elec, h_tissues_ras, vox,elec_list,[fullpath,subdir]);
     t1w=double(h_t1_ras.img);
     t1w=t1w./max(t1w(:));
-    thres=mean(t1w(mask_elec~=0))*2;
+    thres=mean(t1w(mask_elec~=0))*thres_factor;
     %%%find image signal from electrode gel:
     mask_elec(t1w<thres)=0;    %%% Clean up:
     mask_elec=imerode(mask_elec,strel('sphere',1));
@@ -95,6 +116,7 @@ function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,small
             if ind1(3)==ind2(3)%%%electrode which is in the middle in xy plane
                 ind=ind1(3);
             else
+                coords
                 x_val = input('Enter x-coordinate rounded to one decimal place (float): ');%calls for user input
                 ind_h=find(round(coords(:,1),1)==x_val);
                 ind=ind_h(1);
@@ -129,12 +151,12 @@ function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,small
     save_untouch_nii(h_help,[fullpath,subdir,'/landmarks.nii'])%%%visualize centroids in ras coordinate system
 
     %%%setup SimNibs simulation and run
-    S1=simNibs_template(fullpath,subdir,elec_list,'/elec_pos_list','ring');
-    %%%run SimNibs
-    run_simnibs(S1)
-    S2=simNibs_template(fullpath,subdir,coords_ordered,'/elec_pos_actual','ring');
-    %%%run SimNibs
-    run_simnibs(S2)
+    % S1=simNibs_template(fullpath,subdir,elec_list,'/elec_pos_list','ring');
+    % %%%run SimNibs
+    % run_simnibs(S1)
+    % S2=simNibs_template(fullpath,subdir,coords_ordered,'/elec_pos_actual','ring');
+    % %%%run SimNibs
+    % run_simnibs(S2)
 
 end
 %end
