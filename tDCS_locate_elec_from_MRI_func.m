@@ -28,9 +28,8 @@ end
 
 
     figure
-    %%%Get head measures - this is optional (but in this step a figure is created which we might need later)
     h_mesh = mesh_load_gmsh4([fullpath,subdir,'/',subdir(5:end),'.msh']);
-    try
+    try    %%%Get head measures - this is optional 
     computeHeadMeas3(h_mesh, [fullpath,subdir,'/','eeg_positions/Fiducials.csv'], subdir(5:end))
     catch
         all_tri = h_mesh.triangles;            % Nx3
@@ -101,38 +100,39 @@ trisurf(scalp_tri, scalp_vertices(:,1), scalp_vertices(:,2), scalp_vertices(:,3)
     % % %left/right side of the head (e.g. F3 (anode) and F4) or five eletrodes
     % % %(middel on is anode)
     fid = fopen([fullpath,subdir,'/actual_electrodes.txt'], 'w');
-    if numElec==2
-        if coords(1,1)>coords(2,1)
-            coords_ordered(1,:)=coords(2,:);%%anode ist first
-            coords_ordered(2,:)=coords(1,:);
-        else
-            coords_ordered(1,:)=coords(1,:);%%anode ist first
-            coords_ordered(2,:)=coords(2,:);
-        end
-    elseif numElec==5
-        if size(coords,1)==5
-            [coor1ds_sorted,ind1]=sort(coords(:,1));
-            [coor2ds_sorted,ind2]=sort(coords(:,2));
-            if ind1(3)==ind2(3)%%%electrode which is in the middle in xy plane
-                ind=ind1(3);
-            else
-                coords
-                x_val = input('Enter x-coordinate rounded to one decimal place (float): ');%calls for user input
-                ind_h=find(round(coords(:,1),1)==x_val);
-                ind=ind_h(1);
-            end
-            coords_ordered(1,:)=coords(ind,:);%%%anode ist first
-            r_ind=2;
-            for i=1:size(coords,1)
-                if i~=ind
-                    coords_ordered(r_ind,:)=coords(i,:);
-                    r_ind=r_ind+1;
-                end
-            end
-        else
-            fprintf('Electrodes are missing for subject "%s"', subdir);
-        end
-    end
+    coords_ordered= get_anode(coords,numElec,elec_list,subdir);
+    % if numElec==2
+    %     if coords(1,1)>coords(2,1)
+    %         coords_ordered(1,:)=coords(2,:);%%anode ist first
+    %         coords_ordered(2,:)=coords(1,:);
+    %     else
+    %         coords_ordered(1,:)=coords(1,:);%%anode ist first
+    %         coords_ordered(2,:)=coords(2,:);
+    %     end
+    % elseif numElec==5
+    %     if size(coords,1)==5
+    %         [coor1ds_sorted,ind1]=sort(coords(:,1));
+    %         [coor2ds_sorted,ind2]=sort(coords(:,2));
+    %         if ind1(3)==ind2(3)%%%electrode which is in the middle in xy plane
+    %             ind=ind1(3);
+    %         else
+    %             coords
+    %             x_val = input('Enter x-coordinate rounded to one decimal place (float): ');%calls for user input
+    %             ind_h=find(round(coords(:,1),1)==x_val);
+    %             ind=ind_h(1);
+    %         end
+    %         coords_ordered(1,:)=coords(ind,:);%%%anode ist first
+    %         r_ind=2;
+    %         for i=1:size(coords,1)
+    %             if i~=ind
+    %                 coords_ordered(r_ind,:)=coords(i,:);
+    %                 r_ind=r_ind+1;
+    %             end
+    %         end
+    %     else
+    %         fprintf('Electrodes are missing for subject "%s"', subdir);
+    %     end
+    % end
 
     for i = 1:size(coords_ordered,1)
         if i==1
@@ -150,13 +150,13 @@ trisurf(scalp_tri, scalp_vertices(:,1), scalp_vertices(:,2), scalp_vertices(:,3)
     h_help.img=landmarks;
     save_untouch_nii(h_help,[fullpath,subdir,'/landmarks.nii'])%%%visualize centroids in ras coordinate system
 
-    %%%setup SimNibs simulation and run
-    % S1=simNibs_template(fullpath,subdir,elec_list,'/elec_pos_list','ring');
-    % %%%run SimNibs
-    % run_simnibs(S1)
-    % S2=simNibs_template(fullpath,subdir,coords_ordered,'/elec_pos_actual','ring');
-    % %%%run SimNibs
-    % run_simnibs(S2)
+    %%setup SimNibs simulation and run
+    S1=simNibs_template(fullpath,subdir,elec_list,'/elec_pos_list','ring');
+    %%%run SimNibs
+    run_simnibs(S1)
+    S2=simNibs_template(fullpath,subdir,coords_ordered,'/elec_pos_actual','ring');
+    %%%run SimNibs
+    run_simnibs(S2)
 
 end
 %end
