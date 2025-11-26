@@ -1,5 +1,5 @@
 function coords_ordered= get_anode(coords,numElec,elec_list,subdir)
-if numElec==2 && elec_list=={'F3','F4'}
+if numElec==2 && isequal((elec_list), ({'F3','F4'}))
     if coords(1,1)>coords(2,1)
         coords_ordered(1,:)=coords(2,:);%%anode ist first
         coords_ordered(2,:)=coords(1,:);

@@ -106,7 +106,7 @@ trisurf(scalp_tri, scalp_vertices(:,1), scalp_vertices(:,2), scalp_vertices(:,3)
         if i==1
             fprintf(fid, 'electrode A%d  %.2f  %2f  %.2f  5  1\n', i, coords_ordered(i,1), coords_ordered(i,2), coords_ordered(i,3));
         else
-            fprintf(fid, 'electrode K%d  %.2f  %.2f  %.2f  5  1\n', i, coords_ordered(i,1), coords_ordered(i,2), coords_ordered(i,3));
+            fprintf(fid, 'electrode C%d  %.2f  %.2f  %.2f  5  1\n', i, coords_ordered(i,1), coords_ordered(i,2), coords_ordered(i,3));
         end
     end
     fclose(fid);
