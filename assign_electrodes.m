@@ -46,6 +46,10 @@ end
             fixed_map(pairs(k,1)) = pairs(k,2);
         end
     end
+    if any(fixed_map == 0)
+        error('%s: no actual electrode assigned to %s', subdir, strjoin(elec_list(fixed_map==0), ', '));
+    end
+
     %%% Build ordered coordinate array
     coords_ordered = zeros(numElec, 3);
     for i = 1:numElec

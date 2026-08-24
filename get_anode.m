@@ -11,7 +11,6 @@ if numElec==2 && isequal((elec_list), ({'F3','F4'}))
         coords_ordered(2,:)=coords(2,:);
     end
 elseif numElec==5 && isequal((elec_list), ({'F3','AF3','F1','FC3','F5'})) %the order has to equal the order in elec_list, otherwise:
-    %isequal(sort(elec_config), sort({'F3','AF3','F1','FC3','F5'}))
     if size(coords,1)==5
         [coor1ds_sorted,ind1]=sort(coords(:,1));
         [coor2ds_sorted,ind2]=sort(coords(:,2));
@@ -19,10 +18,7 @@ elseif numElec==5 && isequal((elec_list), ({'F3','AF3','F1','FC3','F5'})) %the o
             ind=ind1(3);
         else
              error('Skipping get_anode.');
-            % coords
-            % x_val = input('Enter x-coordinate rounded to one decimal place (float): ');%calls for user input
-            % ind_h=find(round(coords(:,1),1)==x_val);
-            % ind=ind_h(1);
+            
         end
         coords_ordered(1,:)=coords(ind,:);%%%anode ist first
         r_ind=2;
@@ -33,10 +29,9 @@ elseif numElec==5 && isequal((elec_list), ({'F3','AF3','F1','FC3','F5'})) %the o
             end
         end
     else
-        fprintf('Electrodes are missing for subject "%s"', subdir);
+        error('Electrodes are missing for subject "%s"', subdir);
     end
     elseif numElec==5 && isequal((elec_list), ({'F4','AF4','F2','FC4','F6'})) %the order has to equal the order in elec_list, otherwise:
-    %isequal(sort(elec_config), sort({'F3','AF3','F1','FC3','F5'}))
     if size(coords,1)==5
         [coor1ds_sorted,ind1]=sort(coords(:,1));
         [coor2ds_sorted,ind2]=sort(coords(:,2));
@@ -44,10 +39,7 @@ elseif numElec==5 && isequal((elec_list), ({'F3','AF3','F1','FC3','F5'})) %the o
             ind=ind1(3);
         else
             error('Skipping get_anode.');
-            % coords
-            % x_val = input('Enter x-coordinate rounded to one decimal place (float): ');%calls for user input
-            % ind_h=find(round(coords(:,1),1)==x_val);
-            % ind=ind_h(1);
+            
         end
         coords_ordered(1,:)=coords(ind,:);%%%anode ist first
         r_ind=2;

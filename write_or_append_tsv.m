@@ -20,8 +20,11 @@ function write_or_append_tsv(filename, newData)
 
         newVars = newData.Properties.VariableNames;
 
+       
+        newWidth = sum(cellfun(@(v) size(newData.(v),2), newVars));
+
         % Check if variable names match (case sensitive)
-        if ~isequal(existingVars, newVars)
+        if numel(existingVars) ~= newWidth
             warning('Variable names do not match. Overwriting existing file: %s', filename);
             writetable(newData, filename, 'FileType', 'text', 'Delimiter', '\t');
         else
