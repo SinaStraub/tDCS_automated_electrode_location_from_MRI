@@ -1,4 +1,4 @@
-function coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, freezeFirst,coords)
+function coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, freezeFirst,coords,assign_2d_3d)
 % % Author: Sina Straub, sina.straub@gmail.com, sina.straub@unibe.ch
 % % Copyright (c) 2025 Sina Straub. Licensed under the GPL v3.
 % % Assigns detected electrodes to the intended EEG list.
@@ -17,7 +17,13 @@ else
 end
     
     %%% Prepare distance matrix (XY-plane distances)
+    if assign_2d_3d=='2d'
     D = pdist2(all_list(:,1:2), all_actual(:,1:2));
+    else
+        [coords_proj,info]=tDCS_proj_coords(fullpath,subdir,all_actual)
+    D = pdist2(all_list, coords_proj);
+
+    end
 
     %%% If needed, freeze the first electrode (#1)
     fixed_map = zeros(numElec,1);   % store assignment (actual indices)

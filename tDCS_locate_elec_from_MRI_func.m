@@ -6,7 +6,7 @@
 % % addpath('/path/to/roast-master')
 
 
-function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,smallblobsize,cutoffpositionz,prior_off,thres_factor,imbalance_thresh)
+function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,smallblobsize,cutoffpositionz,prior_off,assign_2d_3d,thres_factor,imbalance_thresh)
 % % Author: Sina Straub, sina.straub@gmail.com, sina.straub@unibe.ch
 % % Copyright (c) 2025 Sina Straub. Licensed under the GPL v3.
 
@@ -20,14 +20,22 @@ function tDCS_locate_elec_from_MRI_func(fullpath,subdir,numElec, elec_list,small
 %%% smallblobsize - 30 (use 30, only adjust for low quality data, e.g. to 50)
 %%% cutoffpositionz - no electrodes are expected below this slice index
 %%% prior_off - 0 = use prior, 1 = do not use prior
+%%% assign_2d_3d - determines whether just x-y plane or full 3d is
+%%% considered for assignmet of electrodes names according to 10-10 system
 %%% thres_factor - factor that is multiplied with the mean signal intensity
 %%% from all voxels that have not been segmented to be tissue. 2 is default and should
 %%% work when electrodes/gel are ok visible, otherwise try 0.5, 0.8, 0.9
 if nargin<8
+    assign_2d_3d='2d';
+end
+if ~(ischar(assign_2d_3d) || isstring(assign_2d_3d))
+    error('assign_2d_3d must be ''2d'' or ''3d'' - check the argument order');
+end
+if nargin<9
     thres_factor=2;
 end
 
-if nargin<9
+if nargin<10
     imbalance_thresh=0.6;
 end
 
@@ -105,9 +113,9 @@ end
 % % %(middel one is anode)
 try
     coords_ordered= get_anode(coords,numElec,elec_list,subdir);
-    coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, 1,coords_ordered);
+    coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, 1,coords_ordered,assign_2d_3d);
 catch
-    coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, 0,coords);
+    coords_ordered=assign_electrodes(fullpath, subdir, numElec, elec_list, 0,coords,assign_2d_3d);
 
 end
 
