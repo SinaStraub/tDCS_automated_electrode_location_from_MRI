@@ -1,4 +1,4 @@
-function centroids_voxel = correct_k_largest_clusters(binaryMask, k, imbalance_thresh)
+function [centroids_voxel,L] = correct_k_largest_clusters(binaryMask, k, imbalance_thresh)
 % % Author: Sina Straub, sina.straub@gmail.com, sina.straub@unibe.ch
 % % Copyright (c) 2025 Sina Straub. Licensed under the GPL v3.
 
@@ -119,9 +119,11 @@ end
 
 %%% Compute centroids from the final cluster masks
 centroids_voxel = zeros(k, 3);
+L = zeros(size(binaryMask_cleaned), 'uint8');
 for i = 1:k
     CC1 = bwconncomp(clusterMasks{i}, 26);
     stats = regionprops3(CC1, 'Centroid');
+    tmpMask = clusterMasks{i};
     if height(stats) ~= 1
         warning('Multiple components found in one mask after kmeans. Using largest one.');
         sizes = cellfun(@numel, CC1.PixelIdxList);
@@ -131,6 +133,7 @@ for i = 1:k
         stats = regionprops3(tmpMask, 'Centroid');
     end
     %%% Swap X and Y here if necessary
+    L(tmpMask) = i;
     centroids_voxel(i,1) = stats.Centroid(2); % X (column 2)
     centroids_voxel(i,2) = stats.Centroid(1); % Y (column 1)
     centroids_voxel(i,3) = stats.Centroid(3); % Z

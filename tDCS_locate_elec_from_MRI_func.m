@@ -92,7 +92,7 @@ h_help=h_tissues;
 h_help.img=mask_elec;
 save_untouch_nii(h_help,[fullpath,subdir,'/mask_elec.nii']);
 %%%connected comps
-centroids_voxel = correct_k_largest_clusters(mask_elec, numElec,imbalance_thresh);
+[centroids_voxel,L] = correct_k_largest_clusters(mask_elec, numElec,imbalance_thresh);
 
 %%%Convert coordinates
 try
